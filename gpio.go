@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"periph.io/x/periph/conn/gpio"
+	"periph.io/x/periph/conn/gpio/gpioreg"
+	"periph.io/x/periph/conn/pin/pinreg"
 	"periph.io/x/periph/host"
 	"periph.io/x/periph/host/rpi"
 )
@@ -28,6 +30,22 @@ func initGpio() {
 	for _, failure := range state.Failed {
 		fmt.Printf("- %s: %v\n", failure.D, failure.Err)
 	}
+}
+
+type PinInfo struct {
+	Name        string `json:"name"`
+	DefaultPull string `json:"defaultPull"`
+}
+
+func info() []PinInfo {
+	var pinInfos []PinInfo
+	for _, p := range gpioreg.All() {
+		if pinreg.IsConnected(p) {
+			pinInfo := PinInfo{p.Name(), p.DefaultPull().String()}
+			pinInfos = append(pinInfos, pinInfo)
+		}
+	}
+	return pinInfos
 }
 
 func startCounter() {
